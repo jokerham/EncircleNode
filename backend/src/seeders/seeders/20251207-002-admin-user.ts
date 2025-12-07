@@ -1,10 +1,13 @@
 // ============================================
 // backend/src/seeders/seeders/20251207-002-admin-user.ts
+import dotenv from 'dotenv';
 import { User } from '../../models/User';
 import { Role } from '../../models/Role';
 import bcrypt from 'bcrypt';
 
 export const name = '20251207-002-admin-user';
+
+dotenv.config();
 
 // Admin user configuration
 const adminConfig = {
@@ -22,14 +25,11 @@ export async function up() {
     if (!adminRole) {
       throw new Error('Admin role not found. Cannot create admin user. Please run role seeder first.');
     }
-
-    // Create admin user directly (bypassing signUp to avoid duplicate logic)
-    const hashedPassword = await bcrypt.hash(adminConfig.password, 10);
     
     const adminUser = await User.create({
       name: adminConfig.name,
       email: adminConfig.email,
-      password: hashedPassword,
+      password: adminConfig.password,
       roleId: adminRole._id,
       isActive: true
     });

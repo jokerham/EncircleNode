@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import { IRole } from './Role';
 import { IPermission, PermissionAction, PermissionScope } from './Permission';
 import { Role } from './Role';
+import { PasswordUtil } from '../utils/password';
 
 export interface IUser extends Document {
   name: string;
@@ -71,8 +72,7 @@ UserSchema.pre('save', async function() {
   if (!this.isModified('password')) return;
   
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password as string, salt);
+    this.password = await PasswordUtil.hash(this.password as string);
   } catch (error: any) {
     throw error;
   }
@@ -85,7 +85,7 @@ UserSchema.pre('save', function() {
 // Method to compare password for login
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    return await PasswordUtil.compare(candidatePassword, this.password);
   } catch (error) {
     return false;
   }
@@ -149,8 +149,7 @@ UserSchema.methods.hasPermission = async function(
   return false;
 };
 
-UserSchema.index({ roleId: 1 });
-
+// Add static method types to the model interface
 interface IUserModel extends mongoose.Model<IUser> {
   signUp(userData: {
     name: string;
@@ -161,5 +160,67 @@ interface IUserModel extends mongoose.Model<IUser> {
   
   signIn(email: string, password: string): Promise<IUser>;
 }
+
+// Static method for sign up
+UserSchema.statics.signUp = async function(userData: {
+  name: string;
+  email: string;
+  password: string;
+  roleId: string | mongoose.Types.ObjectId;
+}) {
+  // Check if user already exists
+  const existingUser = await this.findOne({ email: userData.email });
+  if (existingUser) {
+    throw new Error('User with this email already exists');
+  }
+  
+  // Verify role exists
+  const role = await Role.findById(userData.roleId);
+  if (!role) {
+    throw new Error('Invalid role');
+  }
+  
+  // Create new user
+  const user = new this({
+    name: userData.name,
+    email: userData.email,
+    password: userData.password,
+    roleId: userData.roleId
+  });
+  
+  await user.save();
+  
+  // Return user without password, with role populated
+  const userWithRole = await this.findById(user._id).populate('roleId').select('-password');
+  return userWithRole;
+};
+
+// Static method for sign in
+UserSchema.statics.signIn = async function(email: string, password: string) {
+  const user = await this.findOne({ email }).select('+password');
+  
+  if (!user) {
+    throw new Error('Invalid email or password');
+  }
+  
+  if (!user.isActive) {
+    throw new Error('Account is deactivated');
+  }
+  
+  const isPasswordValid = await user.comparePassword(password);
+  if (!isPasswordValid) {
+    throw new Error('Invalid email or password');
+  }
+  
+  // Update last login
+  user.lastLogin = new Date();
+  await user.save();
+  
+  // Return user with role populated, without password
+  const userWithRole = await this.findById(user._id).populate('roleId').select('-password');
+  return userWithRole;
+};
+
+UserSchema.index({ roleId: 1 });
 
 export const User = mongoose.model<IUser, IUserModel>('User', UserSchema);
