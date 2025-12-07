@@ -24,6 +24,14 @@ interface SignUpResponse {
   user: unknown;
 }
 
+interface CheckRoleResponse {
+  userId: string;
+  userName: string;
+  roleName: string;
+  userCurrentRole: string | null;
+  hasRole: boolean;
+}
+
 export const userApi = {
   signIn: (payload: { email: string; password: string }) =>
     api.post<SignInResponse>('/users/signin', payload),
@@ -35,5 +43,8 @@ export const userApi = {
     api.get(`/users/${id}`),
 
   getAllUsers: () =>
-    api.get(`/users`)
+    api.get(`/users`),
+
+  checkRole: (userId: string, roleName: string) =>
+    api.post<CheckRoleResponse>(`/users/${userId}/check-role`, { roleName })
 };

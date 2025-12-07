@@ -8,7 +8,7 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
-export type UserMenuAction = 'alerts' | 'messages' | 'posts' | 'comments' | 'signout';
+export type UserMenuAction = 'alerts' | 'messages' | 'posts' | 'comments' | 'configure' | 'signout';
 
 export interface UserMenuOption {
   action: UserMenuAction;

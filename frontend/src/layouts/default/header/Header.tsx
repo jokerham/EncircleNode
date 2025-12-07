@@ -67,6 +67,7 @@ export const Header: React.FC = () => {
                     isOpen={isOpen}
                     userName={user.name}
                     userEmail={user.email}
+                    userId={user._id}
                     onClose={handleClose}
                     onMenuAction={handleMenuAction}
                   />
