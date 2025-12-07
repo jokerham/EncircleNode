@@ -62,4 +62,6 @@ export const api = {
     request<T>({ ...config, method: 'PUT', url, data: body }),
   del: <T = unknown>(url: string, config?: AxiosRequestConfig) =>
     request<T>({ ...config, method: 'DELETE', url }),
+  patch: <T = unknown, B = unknown>(url: string, body?: B, config?: AxiosRequestConfig) =>
+    request<T>({ ...config, method: 'PATCH', url, data: body }),
 };

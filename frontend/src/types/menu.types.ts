@@ -1,9 +1,11 @@
 // src/types/menu.types.ts
 
 export interface MenuItem {
-  id: number;
+  id: string;
   name: string;
   path: string;
+  icon?: string;
+  children?: MenuItem[];
 }
 
 export type UserMenuAction = 'alerts' | 'messages' | 'posts' | 'comments' | 'signout';

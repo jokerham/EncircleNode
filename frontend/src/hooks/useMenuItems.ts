@@ -1,30 +1,64 @@
 // src/hooks/useMenuItems.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { menuApi, type MenuTreeResponse } from '../api/menuApi';
 import type { MenuItem } from '../types/menu.types';
 
-export const useMenuItems = () => {
+// Helper function to convert backend menu structure to frontend MenuItem
+const convertToMenuItem = (menu: MenuTreeResponse): MenuItem => {
+  const menuItem: MenuItem = {
+    id: menu._id,
+    name: menu.title,
+    path: menu.url,
+    icon: menu.icon,
+    children: menu.children?.map(child => convertToMenuItem(child))
+  };
+
+  // Only include children if they exist
+  if (!menuItem.children || menuItem.children.length === 0) {
+    delete menuItem.children;
+  }
+
+  return menuItem;
+};
+
+interface UseMenuItemsOptions {
+  activeOnly?: boolean;
+}
+
+export const useMenuItems = (options: UseMenuItemsOptions = {}) => {
+  const { activeOnly = true } = options;
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMenuItems = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await menuApi.getMenuTree(activeOnly);
+      
+      // Convert backend menu structure to frontend MenuItem structure
+      const convertedMenuItems = response.map(menu => convertToMenuItem(menu));
+      
+      setMenuItems(convertedMenuItems);
+    } catch (err) {
+      console.error('Error fetching menu items:', err);
+      setError('Failed to fetch menu items');
+      setMenuItems([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeOnly]);
 
   useEffect(() => {
-    const fetchMenuItems = async () => {
-      setIsLoading(true);
-      // Simulating API call - replace with actual API
-      setTimeout(() => {
-        const apiMenuItems: MenuItem[] = [
-          { id: 1, name: 'Home', path: '/' },
-          { id: 2, name: 'Notice', path: '/notice' },
-          { id: 3, name: 'Projects', path: '/projects' },
-          { id: 4, name: 'Resources', path: '/resources' },
-          { id: 5, name: 'About', path: '/about' }
-        ];
-        setMenuItems(apiMenuItems);
-        setIsLoading(false);
-      }, 500);
-    };
-
     fetchMenuItems();
-  }, []);
+  }, [fetchMenuItems]);
 
-  return { menuItems, isLoading };
+  return { 
+    menuItems, 
+    isLoading, 
+    error,
+    refetch: fetchMenuItems 
+  };
 };
