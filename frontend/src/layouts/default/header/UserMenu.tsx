@@ -113,19 +113,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           {userEmail}
         </Typography>
       </Box>
-
-      {/* {finalMenuOptions.map((option) => (
-        <React.Fragment key={option.action}>
-          {option.divider && <Divider />}
-          <MenuItem onClick={() => onMenuAction(option.action)}>
-            <ListItemIcon>
-              <option.icon size={18} />
-            </ListItemIcon>
-            {option.label}
-          </MenuItem>
-        </React.Fragment>
-      ))} */}
-
+      
       {finalMenuOptions.flatMap((option) => {
         const elements = [];
 
