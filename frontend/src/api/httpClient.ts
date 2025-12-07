@@ -45,7 +45,7 @@ function toAppError(error: unknown): AppError {
 async function request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
   try {
     const res = await http.request<T>(config);
-    console.log('HTTP Request:', config.method, config.url, res.data);
+    //console.log('HTTP Request:', config.method, config.url, res.data);
     return res.data;
   } catch (error) {
     throw toAppError(error);

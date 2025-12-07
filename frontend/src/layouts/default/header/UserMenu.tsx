@@ -114,7 +114,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         </Typography>
       </Box>
 
-      {finalMenuOptions.map((option) => (
+      {/* {finalMenuOptions.map((option) => (
         <React.Fragment key={option.action}>
           {option.divider && <Divider />}
           <MenuItem onClick={() => onMenuAction(option.action)}>
@@ -124,7 +124,31 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             {option.label}
           </MenuItem>
         </React.Fragment>
-      ))}
+      ))} */}
+
+      {finalMenuOptions.flatMap((option) => {
+        const elements = [];
+
+        if (option.divider) {
+          elements.push(
+            <Divider key={`${option.action}-divider`} />
+          );
+        }
+
+        elements.push(
+          <MenuItem
+            key={option.action}
+            onClick={() => onMenuAction(option.action)}
+          >
+            <ListItemIcon>
+              <option.icon size={18} />
+            </ListItemIcon>
+            {option.label}
+          </MenuItem>
+        );
+
+        return elements;
+      })}
     </Menu>
   );
 };
