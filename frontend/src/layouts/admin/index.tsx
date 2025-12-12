@@ -6,14 +6,8 @@ import {
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
-//import Header from './Header';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import MenuSettings from '../../module/menu/admin/list';
-import ModuleSettings from '../../module/module/admin/list';
-import MemberList from '../../module/member/admin/list';
-import PostManagement from '../../module/post/admin/list';
-import FileManagement from '../../module/file/admin/list';
 
 const theme = createTheme({
   palette: {
@@ -32,34 +26,22 @@ const theme = createTheme({
 
 const drawerWidth = 260;
 
-// Main App Component
-const AdminDashboard: React.FC = () => {
-  const [drawerOpen, setDrawerOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('menu');
+interface AdminLayoutProps {
+  children: React.ReactNode;
+}
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'menu':
-        return <MenuSettings />;
-      case 'modules':
-        return <ModuleSettings />;
-      case 'members':
-        return <MemberList />;
-      case 'posts':
-        return <PostManagement />;
-      case 'files':
-        return <FileManagement />;
-      default:
-        return <MenuSettings />;
-    }
-  };
+// Admin Layout Component
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+  const [drawerOpen, setDrawerOpen] = useState(true);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', width: '100vw' }}>
         <Header onMenuClick={() => setDrawerOpen(!drawerOpen)} />
-        <Sidebar open={drawerOpen} activeTab={activeTab} onTabChange={setActiveTab} />
+        <Sidebar open={drawerOpen} activeTab={''} onTabChange={function (tab: string): void {
+          throw new Error('Function not implemented.');
+        } } />
         <Box
           component="main"
           sx={{
@@ -75,7 +57,7 @@ const AdminDashboard: React.FC = () => {
         >
           <Toolbar />
           <Box>
-            {renderContent()}
+            {children}
           </Box>
         </Box>
       </Box>
@@ -83,4 +65,4 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminLayout;

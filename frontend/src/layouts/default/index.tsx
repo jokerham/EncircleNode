@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 
 import Header from './header';
-import DefaultContent from './main';
+import DefaultContent from '../../DefaultContent';
 import Footer from './footer';
 
 interface LayoutProps {
