@@ -4,7 +4,7 @@ import { userApi } from '../api/userApi';
 import type { AppError } from '../api/httpClient';
 
 // Types
-interface User {
+export interface User {
   _id: string;
   name: string;
   email: string;

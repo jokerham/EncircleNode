@@ -8,7 +8,6 @@ import {
   IconButton,
   TextField,
   InputAdornment,
-  Avatar,
   Badge,
   Link
 } from '@mui/material';
@@ -17,10 +16,15 @@ import {
   FiSearch,
   FiBell,
 } from 'react-icons/fi';
+import { useAuth } from '../../contexts/authContext';
+import { Author } from '../../components/Author';
 
 // Header Component
 const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
   const navigate = useNavigate();
+  const auth = useAuth();
+
+  const userName = auth.user?.name || 'Admin';
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -69,12 +73,12 @@ const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
             ),
           }}
         />
-        <IconButton color="inherit">
+        <IconButton color="inherit" sx={{ mr: 2 }}>
           <Badge badgeContent={4} color="secondary">
             <FiBell />
           </Badge>
         </IconButton>
-        <Avatar sx={{ bgcolor: 'secondary.main', ml: 2 }}>A</Avatar>
+        <Author userName={userName} showAvatar/>
       </Toolbar>
     </AppBar>
   );
