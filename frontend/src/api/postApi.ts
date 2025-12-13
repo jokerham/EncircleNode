@@ -24,8 +24,7 @@ export interface BoardResponse {
   title: string;
   description?: string;
   slug: string;
-  authorId: string;
-  author?: Author;
+  authorId: Author;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -39,8 +38,7 @@ export interface PostResponse {
   excerpt?: string;
   slug: string;
   status: PostStatus;
-  authorId: string;
-  author?: Author;
+  authorId: Author;
   seriesId?: string;
   series?: BoardResponse;
   seriesOrder?: number;
@@ -57,8 +55,7 @@ export interface CommentResponse {
   _id: string;
   postId: string;
   post?: PostResponse;
-  authorId: string;
-  author?: Author;
+  authorId: Author;
   content: string;
   parentCommentId?: string;
   parentComment?: CommentResponse;

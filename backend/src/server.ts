@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes';
 import menuRoutes from './routes/menuRoutes';
+import postRoutes from './routes/postRoutes';
 import connectDB from './config/database';
 
 dotenv.config();
@@ -30,6 +31,7 @@ async function startServer() {
 
     app.use('/api/users', userRoutes);
     app.use('/api/menus', menuRoutes);
+    app.use('/api/posts', postRoutes);
 
     // 404 handler
     app.use((req, res) => {
