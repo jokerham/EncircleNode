@@ -28,7 +28,7 @@ const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
         <IconButton color="inherit" onClick={onMenuClick} edge="start" sx={{ mr: 2 }}>
           <FiMenu />
         </IconButton>
-        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 2 }}>
+        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 2, textDecoration: 'none' }}>
           Encircle Admin Portal
         </Typography>
         <Link
