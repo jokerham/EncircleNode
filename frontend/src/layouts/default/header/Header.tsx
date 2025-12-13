@@ -30,7 +30,7 @@ export const Header: React.FC = () => {
   // Custom hooks
   const { menuItems, isLoading } = useMenuItems();
   const { user, isAuthenticated, signIn } = useAuth();
-  const { anchorEl, isOpen, handleOpen, handleClose, handleMenuAction } = useUserMenu();
+  const { anchorEl, isOpen, handleOpen, handleClose } = useUserMenu();
 
   const handleSignIn = async (email: string, password: string) => {
     try {
@@ -69,7 +69,6 @@ export const Header: React.FC = () => {
                     userEmail={user.email}
                     userId={user._id}
                     onClose={handleClose}
-                    onMenuAction={handleMenuAction}
                   />
                 </>
               ) : (

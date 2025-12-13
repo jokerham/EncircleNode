@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   AppBar,
@@ -8,7 +9,8 @@ import {
   TextField,
   InputAdornment,
   Avatar,
-  Badge
+  Badge,
+  Link
 } from '@mui/material';
 import {
   FiMenu,
@@ -17,53 +19,65 @@ import {
 } from 'react-icons/fi';
 
 // Header Component
-const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => (
-  <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-    <Toolbar>
-      <IconButton color="inherit" onClick={onMenuClick} edge="start" sx={{ mr: 2 }}>
-        <FiMenu />
-      </IconButton>
-      <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 4 }}>
-        Encircle Admin Portal
-      </Typography>
-      <TextField
-        placeholder="Search..."
-        variant="outlined"
-        size="small"
-        sx={{
-          flexGrow: 1,
-          maxWidth: 400,
-          backgroundColor: 'rgba(255, 255, 255, 0.15)',
-          borderRadius: 1,
-          '& .MuiOutlinedInput-root': {
+const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
+  const navigate = useNavigate();
+
+  return (
+    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <Toolbar>
+        <IconButton color="inherit" onClick={onMenuClick} edge="start" sx={{ mr: 2 }}>
+          <FiMenu />
+        </IconButton>
+        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 2 }}>
+          Encircle Admin Portal
+        </Typography>
+        <Link
+          component="button"
+          variant="body2"
+          onClick={() => navigate('/')}
+          sx={{
             color: 'white',
-            '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-            '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-          },
-        }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <FiSearch style={{ color: 'white' }} />
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Box sx={{ flexGrow: 1 }} />
-      <IconButton color="inherit">
-        <Badge badgeContent={4} color="secondary">
-          <FiBell />
-        </Badge>
-      </IconButton>
-      <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
-        <Avatar sx={{ bgcolor: 'secondary.main', mr: 1 }}>A</Avatar>
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <Typography variant="body2">Admin User</Typography>
-          <Typography variant="caption">admin@mizuho.com</Typography>
-        </Box>
-      </Box>
-    </Toolbar>
-  </AppBar>
-);
+            textDecoration: 'none',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
+          }}
+        >
+          Encircle Portal
+        </Link>
+        <Box sx={{ flexGrow: 1 }} />
+        <TextField
+          placeholder="Search..."
+          variant="outlined"
+          size="small"
+          sx={{
+            maxWidth: 400,
+            mr: 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            borderRadius: 1,
+            '& .MuiOutlinedInput-root': {
+              color: 'white',
+              '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+              '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <FiSearch style={{ color: 'white' }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <IconButton color="inherit">
+          <Badge badgeContent={4} color="secondary">
+            <FiBell />
+          </Badge>
+        </IconButton>
+        <Avatar sx={{ bgcolor: 'secondary.main', ml: 2 }}>A</Avatar>
+      </Toolbar>
+    </AppBar>
+  );
+};
 
 export default Header;

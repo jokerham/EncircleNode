@@ -5,6 +5,7 @@ import {
   CssBaseline,
 } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Outlet } from 'react-router-dom';
 
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -26,12 +27,8 @@ const theme = createTheme({
 
 const drawerWidth = 260;
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
-
 // Admin Layout Component
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+const AdminLayout: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(true);
 
   return (
@@ -39,9 +36,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <CssBaseline />
       <Box sx={{ display: 'flex', width: '100vw' }}>
         <Header onMenuClick={() => setDrawerOpen(!drawerOpen)} />
-        <Sidebar open={drawerOpen} activeTab={''} onTabChange={function (tab: string): void {
-          throw new Error('Function not implemented.');
-        } } />
+        <Sidebar open={drawerOpen} />
         <Box
           component="main"
           sx={{
@@ -57,7 +52,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         >
           <Toolbar />
           <Box>
-            {children}
+            <Outlet />
           </Box>
         </Box>
       </Box>

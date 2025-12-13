@@ -1,5 +1,6 @@
 // src/components/header/UserMenu.tsx
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, MenuItem, Box, Typography, Divider, ListItemIcon } from '@mui/material';
 import {
   FiBell as AlertsIcon,
@@ -10,7 +11,7 @@ import {
   FiLogOut as SignOutIcon,
 } from 'react-icons/fi';
 import { userApi } from '../../../api/userApi';
-import type { UserMenuAction } from '../../../types/menu.types';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface UserMenuProps {
   anchorEl: null | HTMLElement;
@@ -19,36 +20,14 @@ interface UserMenuProps {
   userEmail: string;
   userId: string;
   onClose: () => void;
-  onMenuAction: (action: UserMenuAction) => void;
 }
 
 interface MenuOption {
-  action: UserMenuAction;
   label: string;
   icon: React.ComponentType<{ size?: number }>;
   divider: boolean;
+  onClick: () => void;
 }
-
-const menuOptions: MenuOption[] = [
-  { action: 'alerts' as const, label: 'Alerts', icon: AlertsIcon, divider: false },
-  { action: 'messages' as const, label: 'Messages', icon: MessagesIcon, divider: false },
-  { action: 'posts' as const, label: 'My Posts', icon: PostsIcon, divider: false },
-  { action: 'comments' as const, label: 'My Comments', icon: CommentsIcon, divider: false },
-];
-
-const adminOption: MenuOption = {
-  action: 'configure' as const,
-  label: 'Configure Site',
-  icon: ConfigureIcon,
-  divider: true
-};
-
-const signOutOption: MenuOption = {
-  action: 'signout' as const,
-  label: 'Sign Out',
-  icon: SignOutIcon,
-  divider: true
-};
 
 export const UserMenu: React.FC<UserMenuProps> = ({
   anchorEl,
@@ -56,15 +35,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   userName,
   userEmail,
   userId,
-  onClose,
-  onMenuAction
+  onClose
 }) => {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const finalMenuOptions = useMemo(() => [
-    ...menuOptions,
-    ...(isAdmin ? [adminOption] : []),
-    signOutOption
-  ], [isAdmin]);
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -83,6 +58,50 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       checkAdminRole();
     }
   }, [userId, isOpen]);
+
+  const handleSignOut = () => {
+    signOut();
+    navigate('/');
+  };
+
+  const menuOptions: MenuOption[] = useMemo(() => [
+    { 
+      label: 'Alerts', 
+      icon: AlertsIcon, 
+      divider: false,
+      onClick: () => console.log('Alerts clicked')
+    },
+    { 
+      label: 'Messages', 
+      icon: MessagesIcon, 
+      divider: false,
+      onClick: () => console.log('Messages clicked')
+    },
+    { 
+      label: 'My Posts', 
+      icon: PostsIcon, 
+      divider: false,
+      onClick: () => console.log('My Posts clicked')
+    },
+    { 
+      label: 'My Comments', 
+      icon: CommentsIcon, 
+      divider: false,
+      onClick: () => console.log('My Comments clicked')
+    },
+    ...(isAdmin ? [{
+      label: 'Configure Site',
+      icon: ConfigureIcon,
+      divider: true,
+      onClick: () => navigate('/admin')
+    }] : []),
+    {
+      label: 'Sign Out',
+      icon: SignOutIcon,
+      divider: true,
+      onClick: handleSignOut
+    }
+  ], [isAdmin, navigate, handleSignOut]);
 
   return (
     <Menu
@@ -114,19 +133,19 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         </Typography>
       </Box>
       
-      {finalMenuOptions.flatMap((option) => {
+      {menuOptions.flatMap((option, index) => {
         const elements = [];
 
         if (option.divider) {
           elements.push(
-            <Divider key={`${option.action}-divider`} />
+            <Divider key={`divider-${index}`} />
           );
         }
 
         elements.push(
           <MenuItem
-            key={option.action}
-            onClick={() => onMenuAction(option.action)}
+            key={`menu-${index}`}
+            onClick={option.onClick}
           >
             <ListItemIcon>
               <option.icon size={18} />

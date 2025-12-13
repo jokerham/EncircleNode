@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Drawer,
@@ -31,7 +32,9 @@ interface MenuItem {
 
 // Sidebar Component
 const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
-  const currentPath = window.location.pathname;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   const menuItems: MenuItem[] = [
     { id: 'menu', label: 'Menu Settings', icon: FiList, path: '/admin/menu/list' },
@@ -40,12 +43,6 @@ const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
     { id: 'posts', label: 'Post Management', icon: FiFileText, path: '/admin/post/list' },
     { id: 'files', label: 'File Management', icon: FiFolder, path: '/admin/file/list' },
   ];
-
-  const handleNavigation = (path: string) => {
-    window.history.pushState({}, '', path);
-    // Trigger popstate event to update the router
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  };
 
   const isActive = (path: string) => {
     return currentPath === path;
@@ -68,7 +65,7 @@ const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
             <ListItem key={item.id} disablePadding>
               <ListItemButton
                 selected={isActive(item.path)}
-                onClick={() => handleNavigation(item.path)}
+                onClick={() => navigate(item.path)}
                 sx={{
                   '&.Mui-selected': {
                     backgroundColor: 'primary.main',
@@ -89,7 +86,7 @@ const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
         <Divider />
         <List>
           <ListItem disablePadding>
-            <ListItemButton onClick={() => handleNavigation('/admin/settings')}>
+            <ListItemButton onClick={() => navigate('/admin/settings')}>
               <ListItemIcon>
                 <FiSettings />
               </ListItemIcon>
@@ -97,7 +94,7 @@ const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton onClick={() => handleNavigation('/logout')}>
+            <ListItemButton onClick={() => navigate('/logout')}>
               <ListItemIcon>
                 <FiLogOut />
               </ListItemIcon>

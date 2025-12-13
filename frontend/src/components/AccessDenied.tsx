@@ -3,13 +3,13 @@ import { Box, Link, Typography } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { styled } from "@mui/system";
 
-const NotFoundBox = styled(Box)(({ theme }) => ({
+const AccessDeniedBox = styled(Box)(() => ({
   boxSizing: "border-box",
-  width: "100%",
-  height: "80vh",
+  width: "100vw",
+  height: "100vh",
 }));
 
-const NotFoundContainerBox = styled(Box)(({ theme }) => ({
+const AccessDeniedContainerBox = styled(Box)(() => ({
   boxSizing: 'border-box',
   position: 'relative',
   lineHeight: 1.4,
@@ -22,7 +22,7 @@ const NotFoundContainerBox = styled(Box)(({ theme }) => ({
   transform: 'translate(-50%, -12%)'
 }));
 
-const NotFound404Box = styled(Box)(({ theme }) => ({
+const AccessDenied403Box = styled(Box)(() => ({
   boxSizing: 'border-box',
   position: 'absolute',
   height: 100,
@@ -73,7 +73,7 @@ const theme = createTheme({
           fontSize: 14,
           textDecoration: "none",
           textTransform: "uppercase",
-          background: "#189cf0",
+          background: "#f44336",
           display: "inline-block",
           padding: "16px 38px",
           border: "2px solid transparent",
@@ -83,8 +83,8 @@ const theme = createTheme({
           transition: "0.2s all",
           "&:hover": {
             backgroundColor: "#fff",
-            borderColor: "#189cf0",
-            color: "#189cf0",
+            borderColor: "#f44336",
+            color: "#f44336",
           },
         },
       },
@@ -92,24 +92,24 @@ const theme = createTheme({
   },
 });
 
-const PageNotFound = () => {
+const AccessDenied = () => {
   return (
     <ThemeProvider theme={theme}>
-      <NotFoundBox>
-        <NotFoundContainerBox>
-          <NotFound404Box>
-            <Typography variant="h1">404</Typography>
-          </NotFound404Box>
-          <Typography variant="h2">We are sorry, Page not found!</Typography>
+      <AccessDeniedBox>
+        <AccessDeniedContainerBox>
+          <AccessDenied403Box>
+            <Typography variant="h1">403</Typography>
+          </AccessDenied403Box>
+          <Typography variant="h2">Access Denied!</Typography>
           <Typography variant="h4">
-            The page you are looking for might have been removed had its name
-            changed or is temporarily unavailable.
+            You don't have permission to access this page. Please contact your
+            administrator if you believe this is an error.
           </Typography>
           <Link href="/">Back To Homepage</Link>
-        </NotFoundContainerBox>
-      </NotFoundBox>
+        </AccessDeniedContainerBox>
+      </AccessDeniedBox>
     </ThemeProvider>
   );
 }
 
-export default PageNotFound;
+export default AccessDenied;
