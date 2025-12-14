@@ -1,5 +1,5 @@
-import React, { Suspense, lazy, type ComponentType } from 'react';
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import React, { Suspense, lazy, type ComponentType, useMemo} from 'react';
+import { BrowserRouter, Routes, Route, useParams, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { AuthProvider } from './contexts/authContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -43,60 +43,74 @@ interface DynamicModuleProps {
 }
 
 const DynamicModule: React.FC<DynamicModuleProps> = ({ isAdmin = false }) => {
-  const params = useParams<{ module: string; action?: string; identifier?: string }>();
-  const { module = 'home', action = null, identifier = null } = params;
+  const { module = "home", action, identifier } = useParams<{
+    module: string;
+    action?: string;
+    identifier?: string;
+  }>();
 
-  const LazyComponent = lazy(async () => {
-    try {
-      let ComponentModule: { default: ModuleComponent } | undefined;
+  const location = useLocation();
 
-      // Try to load action-specific component first, then fallback to module index
-      const componentPath = action
-        ? (isAdmin ? `./modules/${module}/admin/${action}` : `./modules/${module}/${action}`)
-        : (isAdmin ? `./modules/${module}/admin/index` : `./modules/${module}/index`);
+  const LazyComponent = useMemo(
+    () =>
+      lazy(async (): Promise<{ default: React.ComponentType<any> }> => {
+        const NotFound: React.ComponentType<any> = () => <PageNotFound />;
 
-      try {
-        ComponentModule = await import(/* @vite-ignore */ componentPath);
-      } catch {
-        // If action component fails, try module index as fallback
-        if (action) {
+        try {
+          const componentPath = action
+            ? isAdmin
+              ? `./modules/${module}/admin/${action}`
+              : `./modules/${module}/${action}`
+            : isAdmin
+              ? `./modules/${module}/admin/index`
+              : `./modules/${module}/index`;
+
+          let imported: { default: ModuleComponent } | undefined;
+
           try {
-            const indexPath = isAdmin ? `./modules/${module}/admin/index` : `./modules/${module}/index`;
-            ComponentModule = await import(/* @vite-ignore */ indexPath);
+            imported = await import(/* @vite-ignore */ componentPath);
           } catch {
-            return { default: () => <PageNotFound /> };
+            // fallback to index if action route missing
+            if (action) {
+              const indexPath = isAdmin
+                ? `./modules/${module}/admin/index`
+                : `./modules/${module}/index`;
+
+              try {
+                imported = await import(/* @vite-ignore */ indexPath);
+              } catch {
+                return { default: NotFound };
+              }
+            } else {
+              return { default: NotFound };
+            }
           }
-        } else {
-          return { default: () => <PageNotFound /> };
-        }
-      }
 
-      if (!ComponentModule || !ComponentModule.default) {
-        return { default: () => <PageNotFound /> };
-      }
+          const Loaded = imported?.default;
+          if (!Loaded) return { default: NotFound };
 
-      // Return component with props already bound
-      return {
-        default: () => {
-          const Component = ComponentModule.default;
-          return (
-            <Component
+          // Always return a ComponentType (not sometimes a plain function type)
+          const Wrapped: React.ComponentType<any> = () => (
+            <Loaded
               module={module}
-              action={action}
-              identifier={identifier}
+              action={action ?? null}
+              identifier={identifier ?? null}
               isAdmin={isAdmin}
             />
           );
+
+          return { default: Wrapped };
+        } catch (e) {
+          console.error("Error loading route:", e);
+          return { default: NotFound };
         }
-      };
-    } catch (error) {
-      console.error('Error loading route:', error);
-      return { default: () => <PageNotFound /> };
-    }
-  });
+      }),
+    [isAdmin, module, action, identifier]
+  );
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    // force remount on every route change
+    <Suspense key={location.pathname} fallback={<LoadingFallback />}>
       <LazyComponent />
     </Suspense>
   );
