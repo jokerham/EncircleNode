@@ -1,7 +1,8 @@
 // src/pages/admin/MenuSettings/index.tsx
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { FiPlus } from 'react-icons/fi';
+import { showToast } from '../../../../functions/showToast';
 import { menuApi, type MenuTreeResponse, MenuType } from '../../../../api/menuApi';
 import { MenuTreePanel } from './MenuTreePanel';
 import { MenuDetailsPanel } from './MenuDetailsPanel';
@@ -10,7 +11,6 @@ const MenuSettings: React.FC = () => {
   const [menuData, setMenuData] = useState<MenuTreeResponse[]>([]);
   const [selectedMenu, setSelectedMenu] = useState<MenuTreeResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -20,11 +20,10 @@ const MenuSettings: React.FC = () => {
   const fetchMenuData = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await menuApi.getMenuTree(false);
       setMenuData(response);
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to load menu data');
+      showToast((err as Error).message || 'Failed to load menu data', 'error');
       console.error('Error fetching menu data:', err);
     } finally {
       setLoading(false);
@@ -48,9 +47,8 @@ const MenuSettings: React.FC = () => {
       });
 
       await fetchMenuData();
-      setError(null);
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to create menu');
+      showToast((err as Error).message || 'Failed to create menu', 'error');
       console.error('Error creating menu:', err);
     } finally {
       setSaving(false);
@@ -71,9 +69,8 @@ const MenuSettings: React.FC = () => {
       });
 
       await fetchMenuData();
-      setError(null);
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to update menu');
+      showToast((err as Error).message || 'Failed to update menu', 'error');
       console.error('Error updating menu:', err);
     } finally {
       setSaving(false);
@@ -90,9 +87,8 @@ const MenuSettings: React.FC = () => {
       await menuApi.deleteMenu(id);
       await fetchMenuData();
       setSelectedMenu(null);
-      setError(null);
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to delete menu');
+      showToast((err as Error).message || 'Failed to delete menu', 'error');
       console.error('Error deleting menu:', err);
     } finally {
       setSaving(false);
@@ -104,9 +100,8 @@ const MenuSettings: React.FC = () => {
       setSaving(true);
       await menuApi.toggleMenuActive(id);
       await fetchMenuData();
-      setError(null);
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to toggle menu status');
+      showToast((err as Error).message || 'Failed to toggle menu status', 'error');
       console.error('Error toggling menu:', err);
     } finally {
       setSaving(false);
@@ -136,12 +131,6 @@ const MenuSettings: React.FC = () => {
           Add Menu Item
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
 
       <Box sx={{ display: 'flex', gap: 3, height: 'calc(100vh - 200px)' }}>
         <MenuTreePanel
