@@ -259,29 +259,29 @@ export const postApi = {
 
   // Create new board
   createBoard: (payload: CreateBoardPayload) =>
-    api.post<CreateBoardResponse>('/posts/boards', payload),
+    api.post<CreateBoardResponse>('/boards', payload),
 
   // Get all boards
   getAllBoards: (isActive?: boolean) => {
     const query = isActive !== undefined ? `?isActive=${isActive}` : '';
-    return api.get<BoardResponse[]>(`/posts/boards${query}`);
+    return api.get<BoardResponse[]>(`/boards${query}`);
   },
 
   // Get board by ID
   getBoardById: (id: string) =>
-    api.get<BoardResponse>(`/posts/boards/${id}`),
+    api.get<BoardResponse>(`/boards/${id}`),
 
   // Get board by slug
   getBoardBySlug: (slug: string) =>
-    api.get<BoardResponse>(`/posts/boards/slug/${slug}`),
+    api.get<BoardResponse>(`/boards/slug/${slug}`),
 
   // Update board
   updateBoard: (id: string, payload: UpdateBoardPayload) =>
-    api.put<UpdateBoardResponse>(`/posts/boards/${id}`, payload),
+    api.put<UpdateBoardResponse>(`/boards/${id}`, payload),
 
   // Delete board
   deleteBoard: (id: string) =>
-    api.del<DeleteBoardResponse>(`/posts/boards/${id}`),
+    api.del<DeleteBoardResponse>(`/boards/${id}`),
 
   // ============================================
   // COMMENT ENDPOINTS
@@ -289,17 +289,17 @@ export const postApi = {
 
   // Create new comment
   createComment: (payload: CreateCommentPayload) =>
-    api.post<CreateCommentResponse>('/posts/comments', payload),
+    api.post<CreateCommentResponse>('/comments', payload),
 
   // Get comments for a post
   getPostComments: (postId: string) =>
-    api.get<CommentResponse[]>(`/posts/comments/post/${postId}`),
+    api.get<CommentResponse[]>(`/comments/post/${postId}`),
 
   // Update comment
   updateComment: (id: string, payload: UpdateCommentPayload) =>
-    api.put<UpdateCommentResponse>(`/posts/comments/${id}`, payload),
+    api.put<UpdateCommentResponse>(`/comments/${id}`, payload),
 
   // Delete comment (soft delete)
   deleteComment: (id: string) =>
-    api.del<DeleteCommentResponse>(`/posts/comments/${id}`),
+    api.del<DeleteCommentResponse>(`/comments/${id}`),
 };

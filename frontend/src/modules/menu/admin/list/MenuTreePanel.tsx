@@ -1,5 +1,5 @@
 // ============================================================================
-// src/pages/admin/MenuSettings/MenuTreePanel.tsx
+// src/modules/menu/admin/list/MenuTreePanel.tsx
 // ============================================================================
 
 import React from 'react';
@@ -79,7 +79,7 @@ export const MenuTreePanel: React.FC<MenuTreePanelProps> = ({
       <Typography variant="h6" sx={{ mb: 2 }}>
         Menu Structure
       </Typography>
-      <Box sx={{ height: 'calc(100% - 40px)', overflow: 'hidden' }}>
+      <Box sx={{ height: 'calc(100% - 50px)', overflow: 'hidden' }}>
         {menuData.length > 0 ? (
           <Tree
             data={menuData}

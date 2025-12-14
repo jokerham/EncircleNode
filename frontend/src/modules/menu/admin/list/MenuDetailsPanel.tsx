@@ -1,5 +1,5 @@
 // ============================================================================
-// src/pages/admin/MenuSettings/MenuDetailsPanel.tsx
+// src/modules/menu/admin/list/MenuDetailsPanel.tsx
 // ============================================================================
 
 import React from 'react';

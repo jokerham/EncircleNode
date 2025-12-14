@@ -20,6 +20,9 @@ import {
   FiGrid,
   FiList
 } from 'react-icons/fi';
+import {
+  PiFiles
+} from 'react-icons/pi';
 
 const drawerWidth = 260;
 
@@ -38,10 +41,11 @@ const Sidebar: React.FC<{ open: boolean }> = ({ open }) => {
 
   const menuItems: MenuItem[] = [
     { id: 'menu', label: 'Menu Settings', icon: FiList, path: '/admin/menu/list' },
-    { id: 'modules', label: 'Module Settings', icon: FiGrid, path: '/admin/module/list' },
     { id: 'members', label: 'Member List', icon: FiUsers, path: '/admin/member/list' },
     { id: 'posts', label: 'Post Management', icon: FiFileText, path: '/admin/post/list' },
+    { id: 'board', label: 'Board Management', icon: PiFiles, path: '/admin/board/list' },
     { id: 'files', label: 'File Management', icon: FiFolder, path: '/admin/file/list' },
+    { id: 'modules', label: 'Module Settings', icon: FiGrid, path: '/admin/module/list' },
   ];
 
   const isActive = (path: string) => {
