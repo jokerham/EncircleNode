@@ -9,7 +9,7 @@ const defaultMenusConfig = [
   {
     title: 'Home',
     type: MenuType.INTERNAL,
-    url: '/',
+    url: '/post/view/welcome-to-encircle',
     icon: 'home',
     order: 1,
     isActive: true
@@ -17,7 +17,7 @@ const defaultMenusConfig = [
   {
     title: 'Notice',
     type: MenuType.INTERNAL,
-    url: '/notice',
+    url: '/post/view/system-updates-december-2024',
     icon: 'bell',
     order: 2,
     isActive: true
@@ -33,7 +33,7 @@ const defaultMenusConfig = [
   {
     title: 'Projects',
     type: MenuType.INTERNAL,
-    url: '/projects',
+    url: '/post/view/how-to-create-first-project',
     icon: 'folder',
     order: 4,
     isActive: true
@@ -41,7 +41,7 @@ const defaultMenusConfig = [
   {
     title: 'Resources',
     type: MenuType.INTERNAL,
-    url: '/resources',
+    url: '/board/list/resources',
     icon: 'file-text',
     order: 5,
     isActive: true
