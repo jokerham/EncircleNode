@@ -17,25 +17,32 @@ import {
   Tooltip,
   Avatar,
   Stack,
+  Button,
 } from '@mui/material';
 import {
   FiEye,
   FiEdit,
   FiTrash2,
   FiCalendar,
+  FiPlus,
 } from 'react-icons/fi';
 import { postApi, type PostResponse, PostStatus } from '../../../api/postApi';
+import { userApi } from '../../../api/userApi';
+import { useAuth } from '../../../contexts/authContext';
 import { showToast } from '../../../functions/showToast';
 
 const PostList: React.FC = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user, isAuthenticated } = useAuth();
   
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPosts, setTotalPosts] = useState(0);
   const [boardInfo, setBoardInfo] = useState<{ title: string } | null>(null);
+  const [canEditBoard, setCanEditBoard] = useState(false);
+  const [checkingPermission, setCheckingPermission] = useState(false);
   const boardSlug = params.identifier;
   
   // Pagination state
@@ -43,6 +50,25 @@ const PostList: React.FC = () => {
     parseInt(searchParams.get('page') || '1') - 1
   );
   const [rowsPerPage] = useState(20);
+
+  // Check if user has permission to edit board
+  const checkBoardPermission = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      setCanEditBoard(false);
+      return;
+    }
+
+    try {
+      setCheckingPermission(true);
+      const response = await userApi.checkRole(user._id, 'board_editor');
+      setCanEditBoard(response.hasRole);
+    } catch (err: unknown) {
+      console.error('Error checking board permission:', err);
+      setCanEditBoard(false);
+    } finally {
+      setCheckingPermission(false);
+    }
+  }, [user, isAuthenticated]);
 
   const fetchBoardAndPosts = useCallback(async () => {
     try {
@@ -96,10 +122,22 @@ const PostList: React.FC = () => {
     }
   }, [page, boardSlug, fetchBoardAndPosts, fetchPosts]);
 
+  useEffect(() => {
+    checkBoardPermission();
+  }, [checkBoardPermission]);
+
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
     setSearchParams({ page: (newPage + 1).toString() });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCreatePost = () => {
+    if (boardSlug) {
+      navigate(`/admin/posts/create?board=${boardSlug}`);
+    } else {
+      navigate('/admin/posts/create');
+    }
   };
 
   const handleViewPost = (slug: string) => {
@@ -178,7 +216,7 @@ const PostList: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h5" component="h2">
-            {boardInfo ? `${boardInfo.title} - Posts` : 'Posts'}
+            {boardInfo ? `${boardInfo.title} - Board` : 'Board'}
           </Typography>
           {boardSlug && !boardInfo && loading && (
             <Typography variant="body2" color="text.secondary">
@@ -186,9 +224,21 @@ const PostList: React.FC = () => {
             </Typography>
           )}
         </Box>
-        <Typography variant="body2" color="text.secondary">
-          Total: {totalPosts} posts
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Total: {totalPosts} posts
+          </Typography>
+          {canEditBoard && !checkingPermission && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<FiPlus />}
+              onClick={handleCreatePost}
+            >
+              Create Post
+            </Button>
+          )}
+        </Box>
       </Box>
 
       <TableContainer component={Paper} elevation={2}>

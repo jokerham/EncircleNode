@@ -85,7 +85,7 @@ const BoardEdit: React.FC = () => {
     } catch (err) {
       console.error("Error loading board:", err);
       showToast("Failed to load board", "error");
-      navigate("/"); // Redirect to boards list
+      navigate("/admin"); // Redirect to boards list
     } finally {
       setPageLoading(false);
     }
@@ -187,7 +187,7 @@ const BoardEdit: React.FC = () => {
       }
 
       // Redirect to boards list after success
-      navigate("/boards");
+      navigate("/admin/board/list");
     } catch (err: unknown) {
       console.error("Error saving board:", err);
       const errorMessage =
@@ -203,7 +203,7 @@ const BoardEdit: React.FC = () => {
   };
 
   const handleCancel = () => {
-    navigate("/boards");
+    navigate("/admin/board/list");
   };
 
   // Show loading spinner while fetching board data

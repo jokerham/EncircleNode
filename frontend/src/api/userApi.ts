@@ -45,6 +45,10 @@ export const userApi = {
   getAllUsers: () =>
     api.get(`/users`),
 
+  // New method to get user with full permissions populated
+  getUserWithPermissions: (id: string) =>
+    api.get(`/users/${id}`),
+
   checkRole: (userId: string, roleName: string) =>
     api.post<CheckRoleResponse>(`/users/${userId}/check-role`, { roleName })
 };
