@@ -32,6 +32,21 @@ interface CheckRoleResponse {
   hasRole: boolean;
 }
 
+interface CheckPermissionPayload {
+  userId: string;
+  resource: string;
+  action: string;
+  resourceOwnerId?: string;
+}
+
+interface CheckPermissionResponse {
+  userId: string;
+  resource: string;
+  action: string;
+  resourceOwnerId: string | null;
+  hasPermission: boolean;
+}
+
 export const userApi = {
   signIn: (payload: { email: string; password: string }) =>
     api.post<SignInResponse>('/users/signin', payload),
@@ -49,6 +64,9 @@ export const userApi = {
   getUserWithPermissions: (id: string) =>
     api.get(`/users/${id}`),
 
-  checkRole: (userId: string, roleName: string) =>
-    api.post<CheckRoleResponse>(`/users/${userId}/check-role`, { roleName })
+  checkRole: (payload: { userId: string; roleName: string }) =>
+    api.post<CheckRoleResponse>('/users/check-role', payload),
+
+  checkPermission: (payload: CheckPermissionPayload) =>
+    api.post<CheckPermissionResponse>('/users/check-permission', payload)
 };
