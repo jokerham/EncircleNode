@@ -41,7 +41,7 @@ const PostList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [totalPosts, setTotalPosts] = useState(0);
   const [boardInfo, setBoardInfo] = useState<{ title: string } | null>(null);
-  const [canEditBoard, setCanEditBoard] = useState(false);
+  const [canCreatePost, setCanCreatePost] = useState(false);
   const [checkingPermission, setCheckingPermission] = useState(false);
   const boardSlug = params.identifier;
   
@@ -51,20 +51,23 @@ const PostList: React.FC = () => {
   );
   const [rowsPerPage] = useState(20);
 
-  // Check if user has permission to edit board
-  const checkBoardPermission = useCallback(async () => {
+  // Check if user has permission to create posts
+  const checkPostPermission = useCallback(async () => {
     if (!isAuthenticated || !user) {
-      setCanEditBoard(false);
+      setCanCreatePost(false);
       return;
     }
 
     try {
       setCheckingPermission(true);
-      const response = await userApi.checkRole(user._id, 'board_editor');
-      setCanEditBoard(response.hasRole);
+      const response = await userApi.checkPermission(user._id, {
+        resource: 'Post',
+        action: 'create'
+      });
+      setCanCreatePost(response.hasPermission);
     } catch (err: unknown) {
-      console.error('Error checking board permission:', err);
-      setCanEditBoard(false);
+      console.error('Error checking post permission:', err);
+      setCanCreatePost(false);
     } finally {
       setCheckingPermission(false);
     }
@@ -123,8 +126,8 @@ const PostList: React.FC = () => {
   }, [page, boardSlug, fetchBoardAndPosts, fetchPosts]);
 
   useEffect(() => {
-    checkBoardPermission();
-  }, [checkBoardPermission]);
+    checkPostPermission();
+  }, [checkPostPermission]);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -228,7 +231,7 @@ const PostList: React.FC = () => {
           <Typography variant="body2" color="text.secondary">
             Total: {totalPosts} posts
           </Typography>
-          {canEditBoard && !checkingPermission && (
+          {canCreatePost && !checkingPermission && (
             <Button
               variant="contained"
               color="primary"

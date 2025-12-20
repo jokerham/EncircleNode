@@ -33,7 +33,6 @@ interface CheckRoleResponse {
 }
 
 interface CheckPermissionPayload {
-  userId: string;
   resource: string;
   action: string;
   resourceOwnerId?: string;
@@ -64,9 +63,9 @@ export const userApi = {
   getUserWithPermissions: (id: string) =>
     api.get(`/users/${id}`),
 
-  checkRole: (payload: { userId: string; roleName: string }) =>
-    api.post<CheckRoleResponse>('/users/check-role', payload),
+  checkRole: (userId: string, payload: { roleName: string }) =>
+    api.post<CheckRoleResponse>(`/users/${userId}/check-role`, payload),
 
-  checkPermission: (payload: CheckPermissionPayload) =>
-    api.post<CheckPermissionResponse>('/users/check-permission', payload)
+  checkPermission: (userId: string, payload: CheckPermissionPayload) =>
+    api.post<CheckPermissionResponse>(`/users/${userId}/check-permission`, payload)
 };
