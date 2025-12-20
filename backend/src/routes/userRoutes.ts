@@ -237,38 +237,6 @@ router.post('/:id/check-permission', async (req: Request, res: Response) => {
   }
 });
 
-// Check specific permission
-router.post('/:id/check-permission', async (req: Request, res: Response) => {
-  try {
-    const { resource, action, resourceOwnerId } = req.body;
-
-    if (!resource || !action) {
-      return res.status(400).json({ 
-        message: 'Please provide resource and action' 
-      });
-    }
-
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const hasPermission = await user.hasPermission(resource, action, resourceOwnerId);
-
-    res.json({
-      userId: user._id,
-      resource,
-      action,
-      resourceOwnerId: resourceOwnerId || null,
-      hasPermission
-    });
-  } catch (error) {
-    console.error('Error checking permission:', error);
-    res.status(500).json({ message: 'Error checking permission' });
-  }
-});
-
 // Check if user has a specific role
 router.post('/:id/check-role', async (req: Request, res: Response) => {
   try {
