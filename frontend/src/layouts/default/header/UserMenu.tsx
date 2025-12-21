@@ -11,7 +11,7 @@ import {
   FiLogOut as SignOutIcon,
 } from 'react-icons/fi';
 import { userApi } from '../../../api/userApi';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/authContext';
 
 interface UserMenuProps {
   anchorEl: null | HTMLElement;
@@ -46,7 +46,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       if (!userId) return;
 
       try {
-        const response = await userApi.checkRole(userId, 'Admin');
+        const response = await userApi.checkRole(userId, { roleName: 'Admin' });
         setIsAdmin(response.hasRole);
       } catch (error) {
         console.error('Error checking admin role:', error);
