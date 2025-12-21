@@ -66,6 +66,7 @@ const BoardEdit: React.FC = () => {
       // In create mode, form is ready immediately
       setFormReady(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [identifier]);
 
   const loadBoard = async (boardSlug: string) => {
