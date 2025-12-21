@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, type ComponentType, useMemo} from 'react';
+import React, { Suspense, lazy, useMemo} from 'react';
 import { BrowserRouter, Routes, Route, useParams, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { AuthProvider } from './contexts/authContext';
@@ -7,16 +7,6 @@ import PageNotFound from './components/PageNotFound';
 import DefaultContent from './components/DefaultContent';
 import DefaultLayout from './layouts/default';
 import AdminLayout from './layouts/admin';
-
-// Type definitions
-interface RouteParams {
-  module: string;
-  action: string | null;
-  identifier: string | null;
-  isAdmin: boolean;
-}
-
-type ModuleComponent = ComponentType<RouteParams>;
 
 // Loading fallback component with MUI
 const LoadingFallback: React.FC = () => (
@@ -53,8 +43,8 @@ const DynamicModule: React.FC<DynamicModuleProps> = ({ isAdmin = false }) => {
 
   const LazyComponent = useMemo(
     () =>
-      lazy(async (): Promise<{ default: React.ComponentType<any> }> => {
-        const NotFound: React.ComponentType<any> = () => <PageNotFound />;
+      lazy(async (): Promise<{ default: React.ComponentType<unknown> }> => {
+        const NotFound: React.ComponentType<unknown> = () => <PageNotFound />;
 
         try {
           const componentPath = action
@@ -65,41 +55,78 @@ const DynamicModule: React.FC<DynamicModuleProps> = ({ isAdmin = false }) => {
               ? `./modules/${module}/admin/index`
               : `./modules/${module}/index`;
 
-          let imported: { default: ModuleComponent } | undefined;
-
+          // Try to load the main component path
           try {
-            imported = await import(/* @vite-ignore */ componentPath);
-          } catch {
-            // fallback to index if action route missing
+            const imported = await import(/* @vite-ignore */ componentPath);
+            
+            const Loaded = imported?.default;
+            if (!Loaded) return { default: NotFound };
+
+            const Wrapped: React.ComponentType<unknown> = () => (
+              <Loaded
+                module={module}
+                action={action ?? null}
+                identifier={identifier ?? null}
+                isAdmin={isAdmin}
+              />
+            );
+
+            return { default: Wrapped };
+          } catch (firstError) {
+            // If action exists, try action folder's index.tsx
             if (action) {
-              const indexPath = isAdmin
-                ? `./modules/${module}/admin/index`
-                : `./modules/${module}/index`;
+              const actionIndexPath = isAdmin
+                ? `./modules/${module}/admin/${action}/index`
+                : `./modules/${module}/${action}/index`;
 
               try {
-                imported = await import(/* @vite-ignore */ indexPath);
+                const imported = await import(/* @vite-ignore */ actionIndexPath);
+                
+                const Loaded = imported?.default;
+                if (!Loaded) return { default: NotFound };
+
+                const Wrapped: React.ComponentType<unknown> = () => (
+                  <Loaded
+                    module={module}
+                    action={action ?? null}
+                    identifier={identifier ?? null}
+                    isAdmin={isAdmin}
+                  />
+                );
+
+                return { default: Wrapped };
               } catch {
-                return { default: NotFound };
+                // Final fallback to module index
+                const moduleIndexPath = isAdmin
+                  ? `./modules/${module}/admin/index`
+                  : `./modules/${module}/index`;
+
+                try {
+                  const imported = await import(/* @vite-ignore */ moduleIndexPath);
+                  
+                  const Loaded = imported?.default;
+                  if (!Loaded) return { default: NotFound };
+
+                  const Wrapped: React.ComponentType<unknown> = () => (
+                    <Loaded
+                      module={module}
+                      action={action ?? null}
+                      identifier={identifier ?? null}
+                      isAdmin={isAdmin}
+                    />
+                  );
+
+                  return { default: Wrapped };
+                } catch (moduleIndexError) {
+                  console.error("Error loading all fallbacks:", moduleIndexError);
+                  return { default: NotFound };
+                }
               }
             } else {
+              console.error("Error loading component:", firstError);
               return { default: NotFound };
             }
           }
-
-          const Loaded = imported?.default;
-          if (!Loaded) return { default: NotFound };
-
-          // Always return a ComponentType (not sometimes a plain function type)
-          const Wrapped: React.ComponentType<any> = () => (
-            <Loaded
-              module={module}
-              action={action ?? null}
-              identifier={identifier ?? null}
-              isAdmin={isAdmin}
-            />
-          );
-
-          return { default: Wrapped };
         } catch (e) {
           console.error("Error loading route:", e);
           return { default: NotFound };

@@ -1,6 +1,6 @@
 // src/components/ProtectedRoute.tsx
 import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '../contexts/authContext';
 import { userApi } from '../api/userApi';
@@ -47,7 +47,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       // If admin is required, check the role
       if (requireAdmin) {
         try {
-          const response = await userApi.checkRole(user._id, 'Admin');
+          const response = await userApi.checkRole(user._id, { roleName: 'Admin' });
           setIsAuthorized(response.hasRole);
         } catch (error) {
           console.error('Error checking admin role:', error);

@@ -1,98 +1,102 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import * as Yup from "yup";
-import type { FormConfig } from "./types";
-import FormBuilder from ".";
+// // Example 1: Using form-level variant (all fields use bootstrap)
+// const ExampleWithFormVariant = () => {
+//   const formConfig: FormConfig = {
+//     variant: 'bootstrap', // All fields will use bootstrap variant
+//     fields: [
+//       {
+//         name: 'firstName',
+//         label: 'First Name',
+//         type: 'text',
+//         required: true,
+//       },
+//       {
+//         name: 'email',
+//         label: 'Email',
+//         type: 'text',
+//         required: true,
+//       },
+//     ],
+//     onSubmit: async (values) => {
+//       console.log(values);
+//     },
+//   };
 
-// ==================== DEMO ====================
-const Demo: React.FC = () => {
-  const formConfig: FormConfig = {
-    fields: [
-      {
-        name: 'firstName',
-        label: 'First Name',
-        type: 'text',
-        required: true,
-        placeholder: 'Enter your first name',
-      },
-      {
-        name: 'email',
-        label: 'Email',
-        type: 'text',
-        required: true,
-        validation: Yup.string().email('Invalid email').required('Email is required'),
-      },
-      {
-        name: 'country',
-        label: 'Country',
-        type: 'select',
-        required: true,
-        options: [
-          { label: 'USA', value: 'usa' },
-          { label: 'Canada', value: 'canada' },
-          { label: 'UK', value: 'uk' },
-        ],
-      },
-      {
-        name: 'gender',
-        label: 'Gender',
-        type: 'radio',
-        options: [
-          { label: 'Male', value: 'male' },
-          { label: 'Female', value: 'female' },
-          { label: 'Other', value: 'other' },
-        ],
-      },
-      {
-        name: 'subscribe',
-        label: 'Subscribe to newsletter',
-        type: 'checkbox',
-      },
-      {
-        name: 'birthDate',
-        label: 'Birth Date',
-        type: 'date',
-      },
-      {
-        name: 'meetingTime',
-        label: 'Preferred Meeting Time',
-        type: 'time',
-      },
-      {
-        name: 'documents',
-        label: 'Upload Documents',
-        type: 'file',
-        multiple: true,
-        accept: '.pdf,.doc,.docx',
-        onUpload: async (files: File[]) => {
-          // Simulate file upload
-          return files.map((file) => ({
-            name: file.name,
-            url: URL.createObjectURL(file),
-            size: file.size,
-            type: file.type,
-            uploadedAt: new Date(),
-          }));
-        },
-      },
-    ],
-    onSubmit: async (values, { setSubmitting }) => {
-      console.log('Form submitted:', values);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      alert('Form submitted successfully!');
-      setSubmitting(false);
-    },
-    submitButtonText: 'Submit Form',
-  };
+//   return <FormBuilder {...formConfig} />;
+// };
 
-  return (
-    <Box sx={{ maxWidth: 600, margin: '0 auto', padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Dynamic Form Builder Demo
-      </Typography>
-      <FormBuilder {...formConfig} />
-    </Box>
-  );
-};
+// // Example 2: Mixed variants (form-level + field-level override)
+// const ExampleWithMixedVariants = () => {
+//   const formConfig: FormConfig = {
+//     variant: 'default', // Default variant for form
+//     fields: [
+//       {
+//         name: 'firstName',
+//         label: 'First Name',
+//         type: 'text',
+//         required: true,
+//         // Uses form-level 'default' variant
+//       },
+//       {
+//         name: 'email',
+//         label: 'Email',
+//         type: 'text',
+//         required: true,
+//         variant: 'bootstrap', // Override: this field uses bootstrap variant
+//       },
+//       {
+//         name: 'country',
+//         label: 'Country',
+//         type: 'select',
+//         variant: 'custom', // Override: this field uses custom variant
+//         options: [
+//           { label: 'USA', value: 'usa' },
+//           { label: 'Canada', value: 'canada' },
+//         ],
+//       },
+//     ],
+//     onSubmit: async (values) => {
+//       console.log(values);
+//     },
+//   };
 
-export default Demo;
+//   return <FormBuilder {...formConfig} />;
+// };
+
+// // Example 3: Registering a new variant dynamically
+// import { registerVariant } from './styles';
+
+// // Create your custom components
+// const MyCustomTextField = (props: any) => {
+//   return <div>My Custom Text Field</div>;
+// };
+
+// // Register the new variant
+// registerVariant('mycompany', {
+//   TextFieldComponent: MyCustomTextField,
+//   SelectFieldComponent: DefaultSelectFieldComponent, // Can reuse existing
+//   CheckboxFieldComponent: DefaultCheckboxFieldComponent,
+//   RadioFieldComponent: DefaultRadioFieldComponent,
+//   DateFieldComponent: DefaultDateFieldComponent,
+//   TimeFieldComponent: DefaultTimeFieldComponent,
+//   FileUploadComponent: DefaultFileUploadComponent,
+//   CustomFieldComponent: DefaultCustomFieldComponent,
+// });
+
+// // Now you can use it
+// const ExampleWithDynamicVariant = () => {
+//   const formConfig: FormConfig = {
+//     variant: 'mycompany',
+//     fields: [
+//       {
+//         name: 'firstName',
+//         label: 'First Name',
+//         type: 'text',
+//       },
+//     ],
+//     onSubmit: async (values) => {
+//       console.log(values);
+//     },
+//   };
+
+//   return <FormBuilder {...formConfig} />;
+// };

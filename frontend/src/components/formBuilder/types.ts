@@ -1,7 +1,7 @@
 import React from 'react';
 import type { FormikProps, FormikHelpers } from 'formik';
 
-// ==================== TYPES ====================
+// ==================== types.ts ====================
 export interface BaseFieldConfig {
   name: string;
   label: string;
@@ -13,6 +13,7 @@ export interface BaseFieldConfig {
   validation?: object;
   className?: string;
   style?: React.CSSProperties;
+  variant?: string; // NEW: e.g., 'default', 'material', 'bootstrap', 'custom'
 }
 
 export interface TextFieldConfig extends BaseFieldConfig {
@@ -75,6 +76,7 @@ export interface FormConfig {
   theme?: Record<string, unknown>;
   className?: string;
   style?: React.CSSProperties;
+  variant?: string; // NEW: Default variant for all fields (can be overridden per field)
 }
 
 export interface UploadedFile {
@@ -88,4 +90,10 @@ export interface UploadedFile {
 export interface FileUploadProgress {
   fileName: string;
   progress: number;
+}
+
+// Component prop interfaces for consistency
+export interface FieldComponentProps<T extends FieldConfig = FieldConfig> {
+  field: T;
+  formikProps: FormikProps<Record<string, unknown>>;
 }

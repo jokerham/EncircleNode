@@ -1,14 +1,13 @@
+// ==================== FormBuilder.tsx ====================
 import React from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box } from '@mui/material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { Box, Button } from '@mui/material';
 import type { FormConfig } from './types';
 import FieldRenderer from './FieldRenderer';
+export type { FormConfig } from './types';
 
-// ==================== FORM BUILDER ====================
-const FormBuilder: React.FC<FormConfig> = ({
+export const FormBuilder: React.FC<FormConfig> = ({
   fields,
   initialValues = {},
   validationSchema,
@@ -16,6 +15,7 @@ const FormBuilder: React.FC<FormConfig> = ({
   submitButtonText = 'Submit',
   className,
   style,
+  variant = 'default', // NEW: Default variant for the entire form
 }) => {
   const defaultInitialValues = fields.reduce((acc, field) => {
     if (!(field.name in initialValues)) {
@@ -40,31 +40,35 @@ const FormBuilder: React.FC<FormConfig> = ({
   const finalValidationSchema = validationSchema || defaultValidationSchema;
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Formik
-        initialValues={finalInitialValues}
-        validationSchema={finalValidationSchema}
-        onSubmit={onSubmit}
-      >
-        {(formikProps) => (
-          <Form className={className} style={style}>
-            {fields.map((field) => (
-              <FieldRenderer key={field.name} field={field} formikProps={formikProps} />
-            ))}
-            <Box mt={3}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={formikProps.isSubmitting}
-              >
-                {submitButtonText}
-              </Button>
-            </Box>
-          </Form>
-        )}
-      </Formik>
-    </LocalizationProvider>
+    <Formik
+      initialValues={finalInitialValues}
+      validationSchema={finalValidationSchema}
+      onSubmit={onSubmit}
+      enableReinitialize={true} // Allow form to reinitialize when initialValues change
+    >
+      {(formikProps) => (
+        <Form className={className} style={style}>
+          {fields.map((field) => (
+            <FieldRenderer 
+              key={field.name} 
+              field={field} 
+              formikProps={formikProps}
+              defaultVariant={variant} // Pass form-level variant
+            />
+          ))}
+          <Box mt={3}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={formikProps.isSubmitting}
+            >
+              {submitButtonText}
+            </Button>
+          </Box>
+        </Form>
+      )}
+    </Formik>
   );
 };
 

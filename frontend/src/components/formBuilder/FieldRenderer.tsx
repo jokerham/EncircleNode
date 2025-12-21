@@ -1,37 +1,43 @@
+// ==================== FieldRenderer.tsx (UPDATED) ====================
 import React from 'react';
 import type { FormikProps } from 'formik';
 import type { FieldConfig } from './types';
-import TextFieldComponent from './styles/default/TextFieldComponent';
-import SelectFieldComponent from './styles/default/SelectFieldComponent';
-import CheckboxFieldComponent from './styles/default/CheckBoxComponent';
-import RadioFieldComponent from './styles/default/RadioFieldComponent';
-import DateFieldComponent from './styles/default/DateFieldComponent';
-import TimeFieldComponent from './styles/default/TimeFieldConfig';
-import FileUploadComponent from './styles/default/FileUploadComponent';
-import CustomFieldComponent from './styles/default/CustomFieldComponent';
+import { getVariantComponents } from './styles';
 
-// ==================== FIELD RENDERER ====================
-const FieldRenderer: React.FC<{
+interface FieldRendererProps {
   field: FieldConfig;
   formikProps: FormikProps<Record<string, unknown>>;
-}> = ({ field, formikProps }) => {
+  defaultVariant?: string; // Variant from FormConfig
+}
+
+const FieldRenderer: React.FC<FieldRendererProps> = ({ 
+  field, 
+  formikProps, 
+  defaultVariant = 'default' 
+}) => {
+  // Use field-level variant if specified, otherwise use form-level default
+  const variant = field.variant || defaultVariant;
+  
+  // Get the appropriate component set for this variant
+  const components = getVariantComponents(variant);
+
   switch (field.type) {
     case 'text':
-      return <TextFieldComponent field={field} formikProps={formikProps} />;
+      return <components.TextFieldComponent field={field} formikProps={formikProps} />;
     case 'select':
-      return <SelectFieldComponent field={field} formikProps={formikProps} />;
+      return <components.SelectFieldComponent field={field} formikProps={formikProps} />;
     case 'checkbox':
-      return <CheckboxFieldComponent field={field} formikProps={formikProps} />;
+      return <components.CheckboxFieldComponent field={field} formikProps={formikProps} />;
     case 'radio':
-      return <RadioFieldComponent field={field} formikProps={formikProps} />;
+      return <components.RadioFieldComponent field={field} formikProps={formikProps} />;
     case 'date':
-      return <DateFieldComponent field={field} formikProps={formikProps} />;
+      return <components.DateFieldComponent field={field} formikProps={formikProps} />;
     case 'time':
-      return <TimeFieldComponent field={field} formikProps={formikProps} />;
+      return <components.TimeFieldComponent field={field} formikProps={formikProps} />;
     case 'file':
-      return <FileUploadComponent field={field} formikProps={formikProps} />;
+      return <components.FileUploadComponent field={field} formikProps={formikProps} />;
     case 'custom':
-      return <CustomFieldComponent field={field} formikProps={formikProps} />;
+      return <components.CustomFieldComponent field={field} formikProps={formikProps} />;
     default:
       return null;
   }

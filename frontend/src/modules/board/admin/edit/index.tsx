@@ -2,21 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { postApi, type CreateBoardPayload, type UpdateBoardPayload } from "../../../../api/postApi";
 import { showToast } from "../../../../functions/showToast";
+import * as Yup from "yup";
 
 import {
   Box,
-  Button,
   CircularProgress,
   Container,
   Paper,
-  FormControlLabel,
-  Stack,
-  Switch,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useAuth } from "../../../../contexts/authContext";
-
+import FormBuilder, { type FormConfig } from "../../../../components/formBuilder";
+ 
 // Types from postApi.ts
 interface Author {
   _id: string;
@@ -35,37 +32,39 @@ interface BoardResponse {
   updatedAt: string;
 }
 
+interface BoardFormValues {
+  title: string;
+  description: string;
+  slug: string;
+  isActive: boolean;
+}
+
 const BoardEdit: React.FC = () => {
   const auth = useAuth();
   const { identifier } = useParams<{ identifier: string }>();
   const navigate = useNavigate();
   const isEditMode = Boolean(identifier);
 
-  // Get current user ID - replace with your auth context/state
+  // Get current user ID
   const currentUserId = auth.user?._id || "";
 
   const [board, setBoard] = useState<BoardResponse | null>(null);
   const [pageLoading, setPageLoading] = useState(false);
-
-  // Form state
-  const [formData, setFormData] = useState({
+  const [formReady, setFormReady] = useState(false);
+  const [initialValues, setInitialValues] = useState<BoardFormValues>({
     title: "",
     description: "",
     slug: "",
     isActive: true,
   });
 
-  const [errors, setErrors] = useState({
-    title: "",
-    slug: "",
-  });
-
-  const [submitLoading, setSubmitLoading] = useState(false);
-
   // Load board data if in edit mode
   useEffect(() => {
     if (identifier) {
       loadBoard(identifier);
+    } else {
+      // In create mode, form is ready immediately
+      setFormReady(true);
     }
   }, [identifier]);
 
@@ -76,12 +75,15 @@ const BoardEdit: React.FC = () => {
       setBoard(response);
       
       // Populate form with board data
-      setFormData({
+      setInitialValues({
         title: response.title,
         description: response.description || "",
         slug: response.slug,
         isActive: response.isActive,
       });
+      
+      // Mark form as ready after data is loaded
+      setFormReady(true);
     } catch (err) {
       console.error("Error loading board:", err);
       showToast("Failed to load board", "error");
@@ -102,73 +104,36 @@ const BoardEdit: React.FC = () => {
       .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
   };
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      title: newTitle,
-      // Only auto-generate slug in create mode or if slug is empty
-      slug: !isEditMode || !prev.slug ? generateSlug(newTitle) : prev.slug,
-    }));
-    if (errors.title) {
-      setErrors((prev) => ({ ...prev, title: "" }));
-    }
-  };
+  // Validation schema
+  const validationSchema = Yup.object().shape({
+    title: Yup.string()
+      .trim()
+      .required("Title is required"),
+    slug: Yup.string()
+      .trim()
+      .required("Slug is required")
+      .matches(
+        /^[a-z0-9-]+$/,
+        "Slug can only contain lowercase letters, numbers, and hyphens"
+      ),
+    description: Yup.string(),
+    isActive: Yup.boolean(),
+  });
 
-  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSlug = e.target.value;
-    setFormData((prev) => ({ ...prev, slug: newSlug }));
-    if (errors.slug) {
-      setErrors((prev) => ({ ...prev, slug: "" }));
-    }
-  };
-
-  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, description: e.target.value }));
-  };
-
-  const handleIsActiveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, isActive: e.target.checked }));
-  };
-
-  const validate = (): boolean => {
-    const newErrors = { title: "", slug: "" };
-    let isValid = true;
-
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required";
-      isValid = false;
-    }
-
-    if (!formData.slug.trim()) {
-      newErrors.slug = "Slug is required";
-      isValid = false;
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = "Slug can only contain lowercase letters, numbers, and hyphens";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validate()) {
-      return;
-    }
-
-    setSubmitLoading(true);
-
+  // Handle form submission
+  const handleSubmit = async (
+    values: Record<string, unknown>,
+    formikHelpers: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
+    const boardValues = values as unknown as BoardFormValues;
     try {
       if (isEditMode && board) {
         // Edit existing board
         const payload: UpdateBoardPayload = {
-          title: formData.title,
-          description: formData.description || undefined,
-          slug: formData.slug,
-          isActive: formData.isActive,
+          title: boardValues.title,
+          description: boardValues.description || undefined,
+          slug: boardValues.slug,
+          isActive: boardValues.isActive,
         };
 
         await postApi.updateBoard(board._id, payload);
@@ -176,9 +141,9 @@ const BoardEdit: React.FC = () => {
       } else {
         // Create new board
         const payload: CreateBoardPayload = {
-          title: formData.title,
-          description: formData.description || undefined,
-          slug: formData.slug,
+          title: boardValues.title,
+          description: boardValues.description || undefined,
+          slug: boardValues.slug,
           authorId: currentUserId,
         };
 
@@ -198,16 +163,63 @@ const BoardEdit: React.FC = () => {
         `Failed to ${isEditMode ? "update" : "create"} board`;
       showToast(errorMessage as string, "error");
     } finally {
-      setSubmitLoading(false);
+      formikHelpers.setSubmitting(false);
     }
   };
 
-  const handleCancel = () => {
-    navigate("/admin/board/list");
+  // Form configuration
+  const formConfig: FormConfig = {
+    fields: [
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        required: true,
+        placeholder: "Enter board title",
+        onChange: (value, formikProps) => {
+          // Auto-generate slug from title
+          const currentSlug = formikProps.values.slug as string;
+          // Only auto-generate slug in create mode or if slug is empty
+          if (!isEditMode || !currentSlug) {
+            formikProps.setFieldValue("slug", generateSlug(value as string));
+          }
+        },
+      },
+      {
+        name: "slug",
+        label: "Slug",
+        type: "text",
+        required: true,
+        placeholder: "board-url-slug",
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "text",
+        multiline: true,
+        rows: 4,
+        placeholder: "Optional description for the board",
+      },
+      // Only show isActive in edit mode
+      ...(isEditMode
+        ? [
+            {
+              name: "isActive",
+              label: "Active Status (Board is currently active/inactive)",
+              type: "checkbox" as const,
+            },
+          ]
+        : []),
+    ],
+    initialValues: initialValues as unknown as Record<string, unknown>,
+    validationSchema,
+    onSubmit: handleSubmit,
+    submitButtonText: isEditMode ? "Update Board" : "Create Board",
+    variant: "default", // Using default MUI variant
   };
 
   // Show loading spinner while fetching board data
-  if (pageLoading) {
+  if (pageLoading || !formReady) {
     return (
       <Box
         sx={{
@@ -228,101 +240,7 @@ const BoardEdit: React.FC = () => {
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
           {isEditMode ? "Edit Board" : "Create New Board"}
         </Typography>
-
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={3}>
-            {/* Title Field */}
-            <TextField
-              label="Title"
-              value={formData.title}
-              onChange={handleTitleChange}
-              error={Boolean(errors.title)}
-              helperText={errors.title}
-              fullWidth
-              required
-              autoFocus
-              disabled={submitLoading}
-            />
-
-            {/* Slug Field */}
-            <TextField
-              label="Slug"
-              value={formData.slug}
-              onChange={handleSlugChange}
-              error={Boolean(errors.slug)}
-              helperText={
-                errors.slug ||
-                "URL-friendly identifier (lowercase, numbers, hyphens only)"
-              }
-              fullWidth
-              required
-              disabled={submitLoading}
-            />
-
-            {/* Description Field */}
-            <TextField
-              label="Description"
-              value={formData.description}
-              onChange={handleDescriptionChange}
-              fullWidth
-              multiline
-              rows={4}
-              disabled={submitLoading}
-              helperText="Optional description for the board"
-            />
-
-            {/* Active Status Switch (only in edit mode) */}
-            {isEditMode && (
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.isActive}
-                    onChange={handleIsActiveChange}
-                    disabled={submitLoading}
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      Active Status
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {formData.isActive
-                        ? "Board is currently active"
-                        : "Board is currently inactive"}
-                    </Typography>
-                  </Box>
-                }
-              />
-            )}
-
-            {/* Action Buttons */}
-            <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end", pt: 2 }}>
-              <Button
-                onClick={handleCancel}
-                disabled={submitLoading}
-                color="inherit"
-                variant="outlined"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={submitLoading}
-                startIcon={submitLoading ? <CircularProgress size={16} /> : null}
-              >
-                {submitLoading
-                  ? isEditMode
-                    ? "Updating..."
-                    : "Creating..."
-                  : isEditMode
-                  ? "Update Board"
-                  : "Create Board"}
-              </Button>
-            </Stack>
-          </Stack>
-        </form>
+        <FormBuilder {...formConfig} />
       </Paper>
     </Container>
   );
