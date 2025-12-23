@@ -7,7 +7,7 @@ import type { FormConfig } from './types';
 import FieldRenderer from './FieldRenderer';
 export type { FormConfig } from './types';
 
-export const FormBuilder: React.FC<FormConfig> = ({
+const FormBuilder: React.FC<FormConfig> = ({
   fields,
   initialValues = {},
   validationSchema,
